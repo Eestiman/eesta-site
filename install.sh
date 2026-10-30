@@ -11,7 +11,7 @@ if [[ "${EUID}" -ne 0 ]]; then
   exit 1
 fi
 
-for file in index.html robots.txt; do
+for file in index.html robots.txt favicon.svg; do
   if [[ ! -f "${SCRIPT_DIR}/${file}" ]]; then
     echo "Не найден файл ${SCRIPT_DIR}/${file}" >&2
     exit 1
@@ -26,6 +26,7 @@ fi
 install -d -m 0755 "${WEB_ROOT}"
 install -m 0644 "${SCRIPT_DIR}/index.html" "${WEB_ROOT}/index.html"
 install -m 0644 "${SCRIPT_DIR}/robots.txt" "${WEB_ROOT}/robots.txt"
+install -m 0644 "${SCRIPT_DIR}/favicon.svg" "${WEB_ROOT}/favicon.svg"
 
 if id caddy >/dev/null 2>&1; then
   chown -R caddy:caddy "${WEB_ROOT}"
