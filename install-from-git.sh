@@ -18,6 +18,23 @@ if [[ "${EUID}" -ne 0 ]]; then
   exit 1
 fi
 
+if [[ -z "${DOMAIN:-}" ]]; then
+  read -r -p "Укажите домен для установки: " DOMAIN
+fi
+
+DOMAIN="${DOMAIN#http://}"
+DOMAIN="${DOMAIN#https://}"
+DOMAIN="${DOMAIN%%/*}"
+DOMAIN="${DOMAIN%%:*}"
+DOMAIN="${DOMAIN,,}"
+
+if [[ ! "${DOMAIN}" =~ ^([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$ ]]; then
+  echo "Некорректный домен: ${DOMAIN}" >&2
+  exit 1
+fi
+
+WEB_ROOT="${WEB_ROOT:-/var/www/${DOMAIN}}"
+
 if ! command -v git >/dev/null 2>&1; then
   apt-get update
   apt-get install -y git
@@ -44,6 +61,6 @@ else
 fi
 
 chmod +x "${APP_DIR}/install.sh"
-"${APP_DIR}/install.sh"
+DOMAIN="${DOMAIN}" WEB_ROOT="${WEB_ROOT}" "${APP_DIR}/install.sh"
 
-echo "Установка завершена. Для обновления повторно запустите эту же команду."
+echo "Установка ${DOMAIN} завершена. Для обновления повторно запустите эту же команду."
