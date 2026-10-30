@@ -1,0 +1,24 @@
+{
+	https_port 9443
+	default_bind 127.0.0.1
+	auto_https disable_redirects
+}
+
+http://fi2.eesta.pro {
+	bind 0.0.0.0
+	redir https://fi2.eesta.pro{uri} permanent
+}
+
+https://fi2.eesta.pro {
+	root * /var/www/selfsteal
+	encode zstd gzip
+
+	header {
+		X-Robots-Tag "noindex, nofollow, noarchive, nosnippet"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+
+	file_server
+}
