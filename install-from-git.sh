@@ -22,6 +22,7 @@ if [[ -z "${DOMAIN:-}" ]]; then
   read -r -p "Укажите домен для установки: " DOMAIN
 fi
 
+DOMAIN="$(printf '%s' "${DOMAIN}" | LC_ALL=C tr -cd 'A-Za-z0-9.:-/')"
 DOMAIN="${DOMAIN#http://}"
 DOMAIN="${DOMAIN#https://}"
 DOMAIN="${DOMAIN%%/*}"
