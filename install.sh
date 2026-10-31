@@ -62,14 +62,30 @@ elif grep -Fq "https://${DOMAIN}" "${CADDYFILE}"; then
   # Для ранее установленного домена меняем только root его HTTPS-блока.
   cp -a "${CADDYFILE}" "${CADDYFILE}.backup"
   awk -v domain="${DOMAIN}" -v web_root="${WEB_ROOT}" '
-    index($0, "https://" domain) { site = 1 }
+    !site && index($0, "https://" domain) {
+      site = 1
+      depth = 0
+    }
+    {
+      line = $0
+    }
     site && $1 == "root" && $2 == "*" {
       match($0, /^[[:space:]]*/)
-      print substr($0, RSTART, RLENGTH) "root * " web_root
-      next
+      line = substr($0, RSTART, RLENGTH) "root * " web_root
     }
-    { print }
-    site && /^[[:space:]]*}/ { site = 0 }
+    {
+      print line
+      if (site) {
+        open_line = line
+        close_line = line
+        depth += gsub(/{/, "", open_line)
+        depth -= gsub(/}/, "", close_line)
+        if (depth <= 0) {
+          site = 0
+          depth = 0
+        }
+      }
+    }
   ' "${CADDYFILE}.backup" >"${CADDYFILE}"
   echo "Путь сайта ${DOMAIN} обновлён в ${CADDYFILE}"
 else
